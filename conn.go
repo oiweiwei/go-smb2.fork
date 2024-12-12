@@ -714,7 +714,7 @@ func (conn *conn) tryVerify(pkt []byte, isEncrypted bool) error {
 				}
 			}
 		} else {
-			if conn.requireSigning && !isEncrypted {
+			if conn.requireSigning && !isEncrypted && NtStatus(p.Status()) != STATUS_PENDING {
 				if conn.session != nil {
 					if conn.session.sessionFlags&(SMB2_SESSION_FLAG_IS_GUEST|SMB2_SESSION_FLAG_IS_NULL) == 0 {
 						if conn.session.sessionId == p.SessionId() {
