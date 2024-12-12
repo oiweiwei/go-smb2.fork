@@ -214,6 +214,11 @@ retry:
 			default:
 				return nil, &InvalidResponseError{"unknown cipher algorithm"}
 			}
+
+			if n.UseMessageEncryption {
+				conn.useEncryption = true
+			}
+
 		default:
 			// skip unsupported context
 		}
