@@ -15,7 +15,7 @@ type spnegoClient struct {
 func newSpnegoClient(mechs []Initiator) *spnegoClient {
 	mechTypes := make([]asn1.ObjectIdentifier, len(mechs))
 	for i, mech := range mechs {
-		mechTypes[i] = mech.oid()
+		mechTypes[i] = mech.OID()
 	}
 	return &spnegoClient{
 		mechs:     mechs,
@@ -23,12 +23,12 @@ func newSpnegoClient(mechs []Initiator) *spnegoClient {
 	}
 }
 
-func (c *spnegoClient) oid() asn1.ObjectIdentifier {
+func (c *spnegoClient) OID() asn1.ObjectIdentifier {
 	return spnego.SpnegoOid
 }
 
-func (c *spnegoClient) initSecContext() (negTokenInitBytes []byte, err error) {
-	mechToken, err := c.mechs[0].initSecContext()
+func (c *spnegoClient) InitSecContext() (negTokenInitBytes []byte, err error) {
+	mechToken, err := c.mechs[0].InitSecContext()
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func (c *spnegoClient) initSecContext() (negTokenInitBytes []byte, err error) {
 	return negTokenInitBytes, nil
 }
 
-func (c *spnegoClient) acceptSecContext(negTokenRespBytes []byte) (negTokenRespBytes1 []byte, err error) {
+func (c *spnegoClient) AcceptSecContext(negTokenRespBytes []byte) (negTokenRespBytes1 []byte, err error) {
 	negTokenResp, err := spnego.DecodeNegTokenResp(negTokenRespBytes)
 	if err != nil {
 		return nil, err
@@ -52,7 +52,7 @@ func (c *spnegoClient) acceptSecContext(negTokenRespBytes []byte) (negTokenRespB
 		}
 	}
 
-	responseToken, err := c.selectedMech.acceptSecContext(negTokenResp.ResponseToken)
+	responseToken, err := c.selectedMech.AcceptSecContext(negTokenResp.ResponseToken)
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +62,7 @@ func (c *spnegoClient) acceptSecContext(negTokenRespBytes []byte) (negTokenRespB
 		return nil, err
 	}
 
-	mechListMIC := c.selectedMech.sum(ms)
+	mechListMIC := c.selectedMech.Sum(ms)
 
 	negTokenRespBytes1, err = spnego.EncodeNegTokenResp(1, nil, responseToken, mechListMIC)
 	if err != nil {
@@ -72,10 +72,10 @@ func (c *spnegoClient) acceptSecContext(negTokenRespBytes []byte) (negTokenRespB
 	return negTokenRespBytes1, nil
 }
 
-func (c *spnegoClient) sum(bs []byte) []byte {
-	return c.selectedMech.sum(bs)
+func (c *spnegoClient) Sum(bs []byte) []byte {
+	return c.selectedMech.Sum(bs)
 }
 
-func (c *spnegoClient) sessionKey() []byte {
-	return c.selectedMech.sessionKey()
+func (c *spnegoClient) SessionKey() []byte {
+	return c.selectedMech.SessionKey()
 }

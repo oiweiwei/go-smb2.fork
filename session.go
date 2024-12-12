@@ -14,15 +14,19 @@ import (
 
 	"github.com/hirochachacha/go-smb2/internal/crypto/ccm"
 	"github.com/hirochachacha/go-smb2/internal/crypto/cmac"
+	"github.com/hirochachacha/go-smb2/internal/spnego"
 
 	. "github.com/hirochachacha/go-smb2/internal/erref"
 	. "github.com/hirochachacha/go-smb2/internal/smb2"
 )
 
 func sessionSetup(conn *conn, i Initiator, ctx context.Context) (*session, error) {
-	spnego := newSpnegoClient([]Initiator{i})
 
-	outputToken, err := spnego.initSecContext()
+	if !i.OID().Equal(spnego.SpnegoOid) /* allow spnego compatible implementations */ {
+		i = newSpnegoClient([]Initiator{i})
+	}
+
+	outputToken, err := i.InitSecContext()
 	if err != nil {
 		return nil, &InvalidResponseError{err.Error()}
 	}
@@ -106,7 +110,7 @@ func sessionSetup(conn *conn, i Initiator, ctx context.Context) (*session, error
 
 	}
 
-	outputToken, err = spnego.acceptSecContext(r.SecurityBuffer())
+	outputToken, err = i.AcceptSecContext(r.SecurityBuffer())
 	if err != nil {
 		return nil, &InvalidResponseError{err.Error()}
 	}
@@ -125,7 +129,7 @@ func sessionSetup(conn *conn, i Initiator, ctx context.Context) (*session, error
 	}
 
 	if s.sessionFlags&(SMB2_SESSION_FLAG_IS_GUEST|SMB2_SESSION_FLAG_IS_NULL) == 0 {
-		sessionKey := spnego.sessionKey()
+		sessionKey := i.SessionKey()
 
 		switch conn.dialect {
 		case SMB202, SMB210:
