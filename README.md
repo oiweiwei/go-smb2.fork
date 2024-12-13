@@ -1,8 +1,14 @@
-smb2
+Fork: github.com/hirochachacha/go-smb2
 ====
 
-[![Build Status](https://github.com/hirochachacha/go-smb2/actions/workflows/go.yml/badge.svg)](https://github.com/hirochachacha/go-smb2/actions/workflows/go.yml)
-[![Go Reference](https://pkg.go.dev/badge/github.com/hirochachacha/go-smb2.svg)](https://pkg.go.dev/github.com/hirochachacha/go-smb2)
+Fork Updates
+-------
+
+ * fix: skip `STATUS_PENDING` errors from signature verification;
+
+ * add `use_message_encryption` flag to negotiator;
+
+ * make Initiator interface public;
 
 Description
 -----------
@@ -12,12 +18,12 @@ SMB2/3 client implementation.
 Installation
 ------------
 
-`go get github.com/hirochachacha/go-smb2`
+`go get github.com/oiweiwei/go-smb2.fork`
 
 Documentation
 -------------
 
-http://godoc.org/github.com/hirochachacha/go-smb2
+http://godoc.org/github.com/oiweiwei/go-smb2.fork
 
 Examples
 --------
@@ -31,7 +37,7 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/hirochachacha/go-smb2"
+	"github.com/oiweiwei/go-smb2.fork"
 )
 
 func main() {
@@ -75,7 +81,7 @@ import (
 	"io/ioutil"
 	"net"
 
-	"github.com/hirochachacha/go-smb2"
+	"github.com/oiweiwei/go-smb2.fork"
 )
 
 func main() {
@@ -141,7 +147,7 @@ import (
 	"net"
 	"os"
 
-	"github.com/hirochachacha/go-smb2"
+	"github.com/oiweiwei/go-smb2.fork"
 )
 
 func main() {
@@ -198,7 +204,7 @@ import (
 	"net"
 	iofs "io/fs"
 
-	"github.com/hirochachacha/go-smb2"
+	"github.com/oiweiwei/go-smb2.fork"
 )
 
 func main() {
