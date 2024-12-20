@@ -129,7 +129,8 @@ func sessionSetup(conn *conn, i Initiator, ctx context.Context) (*session, error
 	}
 
 	if s.sessionFlags&(SMB2_SESSION_FLAG_IS_GUEST|SMB2_SESSION_FLAG_IS_NULL) == 0 {
-		sessionKey := i.SessionKey()
+
+		sessionKey := padSessionKey(i.SessionKey())
 
 		switch conn.dialect {
 		case SMB202, SMB210:
@@ -254,6 +255,12 @@ func sessionSetup(conn *conn, i Initiator, ctx context.Context) (*session, error
 	s.enableSession()
 
 	return s, nil
+}
+
+func padSessionKey(key []byte) []byte {
+	newKey := make([]byte, 16)
+	copy(newKey, key)
+	return newKey
 }
 
 type session struct {
