@@ -227,6 +227,12 @@ type Share struct {
 	ctx context.Context
 }
 
+func (fs *Share) ApplicationKey() []byte {
+	key := make([]byte, len(fs.applicationKey))
+	copy(key, fs.applicationKey)
+	return key
+}
+
 func (fs *Share) WithContext(ctx context.Context) *Share {
 	if ctx == nil {
 		panic("nil context")
@@ -667,13 +673,12 @@ func (fs *Share) Stat(name string) (os.FileInfo, error) {
 		return nil, &os.PathError{Op: "stat", Path: name, Err: err}
 	}
 
-	fi, err := f.fileStat, nil
-	if e := f.close(); err == nil {
-		err = e
-	}
-	if err != nil {
+	fi := f.fileStat
+
+	if err := f.close(); err != nil {
 		return nil, &os.PathError{Op: "stat", Path: name, Err: err}
 	}
+
 	return fi, nil
 }
 
@@ -1879,6 +1884,35 @@ func (f *File) WriteTo(w io.Writer) (n int64, err error) {
 
 func (f *File) WriteString(s string) (n int, err error) {
 	return f.Write([]byte(s))
+}
+
+type encoderBytes []byte
+
+func (e encoderBytes) Size() int {
+	return len(([]byte)(e))
+}
+
+func (e encoderBytes) Encode(buf []byte) {
+	copy(buf, ([]byte)(e))
+}
+
+var _ Encoder = encoderBytes(nil)
+
+// Transcieve function is used to send a request and receive a response in a single call.
+func (f *File) Transcieve(p []byte, out []byte) (int, error) {
+	output, err := f.ioctl(&IoctlRequest{
+		CtlCode:           FSCTL_PIPE_TRANSCEIVE,
+		OutputOffset:      0,
+		OutputCount:       0,
+		MaxInputResponse:  0,
+		MaxOutputResponse: uint32(len(out)),
+		Flags:             SMB2_0_IOCTL_IS_FSCTL,
+		Input:             (encoderBytes)(p),
+	})
+	if err != nil {
+		return 0, err
+	}
+	return copy(out, output), nil
 }
 
 func (f *File) encodeSize(e Encoder) int {

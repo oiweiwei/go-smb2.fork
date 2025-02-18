@@ -145,7 +145,7 @@ func sessionSetup(conn *conn, i Initiator, ctx context.Context) (*session, error
 			s.signer = cmac.New(ciph)
 			s.verifier = cmac.New(ciph)
 
-			// s.applicationKey = kdf(sessionKey, []byte("SMB2APP\x00"), []byte("SmbRpc\x00"))
+			s.applicationKey = kdf(sessionKey, []byte("SMB2APP\x00"), []byte("SmbRpc\x00"))
 
 			encryptionKey := kdf(sessionKey, []byte("SMB2AESCCM\x00"), []byte("ServerIn \x00"))
 			decryptionKey := kdf(sessionKey, []byte("SMB2AESCCM\x00"), []byte("ServerOut\x00"))
@@ -184,7 +184,7 @@ func sessionSetup(conn *conn, i Initiator, ctx context.Context) (*session, error
 			s.signer = cmac.New(ciph)
 			s.verifier = cmac.New(ciph)
 
-			// s.applicationKey = kdf(sessionKey, []byte("SMBAppKey\x00"), preauthIntegrityHashValue)
+			s.applicationKey = kdf(sessionKey, []byte("SMBAppKey\x00"), s.preauthIntegrityHashValue[:])
 
 			encryptionKey := kdf(sessionKey, []byte("SMBC2SCipherKey\x00"), s.preauthIntegrityHashValue[:])
 			decryptionKey := kdf(sessionKey, []byte("SMBS2CCipherKey\x00"), s.preauthIntegrityHashValue[:])
@@ -275,7 +275,7 @@ type session struct {
 	encrypter cipher.AEAD
 	decrypter cipher.AEAD
 
-	// applicationKey []byte
+	applicationKey []byte
 }
 
 func (s *session) logoff(ctx context.Context) error {
